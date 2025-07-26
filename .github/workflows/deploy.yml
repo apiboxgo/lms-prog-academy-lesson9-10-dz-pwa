@@ -1,9 +1,9 @@
-name: Deploy PWA to EC2 Docker
+name: Deploy to EC2 with Safe Rename
 
 on:
   push:
     branches:
-      - main
+      - main  # или твоя ветка
 
 jobs:
   deploy:
@@ -20,15 +20,30 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "."
-          target: "~/lms-prog-academy-lesson9-10-dz-docker/pwa"
+          target: "~/lms-prog-academy-lesson9-10-dz-docker/pwa_"
 
-      - name: SSH and update dependencies
+      - name: SSH into EC2 and deploy with rename
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd ~/lms-prog-academy-lesson9-10-dz-docker/pwa
-            docker compose exec -T pwa npm install
+            cd ~/lms-prog-academy-lesson9-10-dz-docker
+
+            if [ -d "pwa__" ]; then
+              echo "Удаляем старую резервную папку pwa__"
+              rm -rf pwa__
+            fi
+
+            # Переименуем текущую рабочую в резервную
+            if [ -d "pwa" ]; then mv pwa pwa__; fi
+
+            # Переименуем новую (залитую) в рабочую
+            mv pwa_ pwa
+
+            # Установим зависимости (если нужно)
+            docker compose exec -T pwa npm install || true
+
+            # Перезапуск контейнера
             docker compose restart pwa
