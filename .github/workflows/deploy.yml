@@ -38,6 +38,6 @@ jobs:
             
             if [ -d "pwa_" ]; then mv pwa_ pwa; else echo "❌ Ошибка: pwa_ не найдена"; exit 1; fi
             
-            docker compose exec -T frontend npm install || true
+            docker compose up -d --build
             
-            docker compose restart frontend
+            docker compose exec -w /app frontend npm install || true
