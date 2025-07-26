@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "."
-          target: "~/lms-prog-academy-lesson9-10-dz-docker/pwa_"
+          target: "~/serv/pwa_"
 
       - name: SSH and deploy safely
         uses: appleboy/ssh-action@v0.1.10
@@ -29,7 +29,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd ~/lms-prog-academy-lesson9-10-dz-docker
+            cd ~/serv
 
             if [ -d "pwa__" ]; then rm -rf pwa__; fi
             
