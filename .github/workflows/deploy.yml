@@ -31,17 +31,13 @@ jobs:
           script: |
             cd ~/lms-prog-academy-lesson9-10-dz-docker
 
-            echo "Удаляем старую резервную папку, если есть"
             if [ -d "pwa__" ]; then rm -rf pwa__; fi
-
-            echo "Создаём резервную копию текущей версии"
+            
             if [ -d "pwa" ]; then mv pwa pwa__; fi
 
-            echo "Делаем новую версию активной"
+            
             if [ -d "pwa_" ]; then mv pwa_ pwa; else echo "❌ Ошибка: pwa_ не найдена"; exit 1; fi
-
-            echo "Обновляем зависимости внутри контейнера"
-            docker compose exec -T pwa npm install || true
-
-            echo "Перезапускаем контейнер"
-            docker compose restart pwa
+            
+            docker compose exec -T frontend npm install || true
+            
+            docker compose restart frontend
