@@ -1,9 +1,9 @@
-name: Deploy to EC2 with Safe Rename
+name: Deploy to EC2 with Safe Folder Switch
 
 on:
   push:
     branches:
-      - main  # или твоя ветка
+      - main  # или своя ветка
 
 jobs:
   deploy:
@@ -22,7 +22,7 @@ jobs:
           source: "."
           target: "~/lms-prog-academy-lesson9-10-dz-docker/pwa_"
 
-      - name: SSH into EC2 and deploy with rename
+      - name: SSH and deploy safely
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -31,19 +31,17 @@ jobs:
           script: |
             cd ~/lms-prog-academy-lesson9-10-dz-docker
 
-            if [ -d "pwa__" ]; then
-              echo "Удаляем старую резервную папку pwa__"
-              rm -rf pwa__
-            fi
+            echo "Удаляем старую резервную папку, если есть"
+            if [ -d "pwa__" ]; then rm -rf pwa__; fi
 
-            # Переименуем текущую рабочую в резервную
+            echo "Создаём резервную копию текущей версии"
             if [ -d "pwa" ]; then mv pwa pwa__; fi
 
-            # Переименуем новую (залитую) в рабочую
-            mv pwa_ pwa
+            echo "Делаем новую версию активной"
+            if [ -d "pwa_" ]; then mv pwa_ pwa; else echo "❌ Ошибка: pwa_ не найдена"; exit 1; fi
 
-            # Установим зависимости (если нужно)
+            echo "Обновляем зависимости внутри контейнера"
             docker compose exec -T pwa npm install || true
 
-            # Перезапуск контейнера
+            echo "Перезапускаем контейнер"
             docker compose restart pwa
